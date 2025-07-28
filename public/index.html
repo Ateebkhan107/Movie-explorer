@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Movie Explorer - Discover Amazing Films</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+  <div class="hero-section">
+    <div class="hero-content">
+      <h1 class="hero-title">
+        <i class="fas fa-film"></i>
+        Movie Explorer
+      </h1>
+      <p class="hero-subtitle">Discover the latest and greatest films from around the world</p>
+    </div>
+    <div class="hero-background"></div>
+  </div>
+
+  <div class="container">
+    <div class="search-section">
+      <div class="search-container">
+        <div class="search-box">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" id="search" placeholder="Search for movies..." />
+        </div>
+        <div class="filter-box">
+          <i class="fas fa-filter filter-icon"></i>
+          <select id="genreSelect">
+            <option value="">All Genres</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="results-info">
+      <span id="resultsCount">Loading movies...</span>
+    </div>
+
+    <div id="movies" class="movie-grid"></div>
+
+    <div class="loading-spinner" id="loadingSpinner">
+      <div class="spinner"></div>
+      <p>Loading amazing movies...</p>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>&copy; 2025 Movie Explorer. Powered by TMDB API</p>
+    <p>BY ATEEB KHAN</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
