@@ -2,290 +2,214 @@
 
 # 🎬 Movie Explorer
 
-**A beautiful, modern movie exploration app with stunning UI and real-time search functionality**
-
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-View%20App-blue?style=for-the-badge&logo=github)](https://ateebkhan107.github.io/Movie-explorer/)
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-black?style=for-the-badge&logo=github)](https://github.com/Ateebkhan107/Movie-explorer)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
-[![Made with Love](https://img.shields.io/badge/Made%20with-❤️-red?style=for-the-badge)](https://github.com/Ateebkhan107)
+[![Made with Love](https://img.shields.io/badge/Made%20with-❤️-red?style=for-the-badge)](https://github.com/Ateebkhan107/Movie-explorer)
 
-*Discover the latest and greatest films from around the world with our beautiful, responsive movie explorer*
+A beautiful, modern movie exploration app built with Node.js, Express, and the TMDB API. Features a responsive design with glassmorphism effects, smooth animations, and a comprehensive movie database.
 
-</div>
+## ✨ Features
 
----
+- 🎨 **Modern UI Design** - Glassmorphism effects, gradients, and smooth animations
+- 📱 **Responsive Design** - Works perfectly on desktop, tablet, and mobile
+- 🔍 **Advanced Search** - Search movies by title with real-time results
+- 🏷️ **Genre Filtering** - Filter movies by genre categories
+- ⭐ **Rating System** - View movie ratings and release years
+- 🚀 **Fast Performance** - Optimized loading with lazy images and caching
+- 🔒 **Production Ready** - Security headers, rate limiting, and error handling
+- 🌐 **Hybrid Architecture** - Works with real API data or demo data seamlessly
 
-## 🔒 Security Notice
+## 🛠️ Tech Stack
 
-**⚠️ IMPORTANT**: This app requires a TMDB API key to function. For security reasons, no API keys are included in this repository.
-
-### **Getting Your API Key**
-1. Visit [TMDB API Settings](https://www.themoviedb.org/settings/api)
-2. Sign up for a free account
-3. Request an API key (Developer option)
-4. Replace `YOUR_TMDB_API_KEY_HERE` in `script.js` with your actual key
-
----
-
-## ✨ Live Demo
-
-**🌐 [View Live App](https://ateebkhan107.github.io/Movie-explorer/)**
-
-Experience the app in action with real-time movie search, filtering, and beautiful animations!
-
----
-
-## 🎯 Features
-
-### 🎨 **Modern Design**
-- **Glassmorphism Effects** - Beautiful frosted glass UI elements
-- **Gradient Backgrounds** - Stunning purple to blue gradients
-- **Smooth Animations** - Hover effects, transitions, and loading animations
-- **Responsive Layout** - Perfect on desktop, tablet, and mobile devices
-
-### 🔍 **Smart Search & Filter**
-- **Real-time Search** - Instant movie search as you type
-- **Genre Filtering** - Filter movies by categories (Action, Drama, Comedy, etc.)
-- **Advanced Results** - View ratings, release years, and movie details
-- **Debounced Input** - Optimized performance with smart search timing
-
-### ⚡ **Performance & UX**
-- **Lazy Loading** - Images load as you scroll for better performance
-- **Loading States** - Beautiful spinners and loading animations
-- **Error Handling** - Graceful error messages and fallbacks
-- **Fast API** - Direct integration with TMDB API for quick results
-
-### 📱 **Cross-Platform**
-- **Mobile-First Design** - Optimized for all screen sizes
-- **Touch-Friendly** - Perfect for mobile and tablet interactions
-- **Progressive Enhancement** - Works on all modern browsers
-
----
-
-## 🛠️ Technology Stack
-
-| Category | Technology | Purpose |
-|----------|------------|---------|
-| **Frontend** | HTML5, CSS3, JavaScript (ES6+) | Core web technologies |
-| **Styling** | Custom CSS with Glassmorphism | Modern UI design |
-| **API** | [TMDB (The Movie Database)](https://www.themoviedb.org/) | Movie data and images |
-| **Icons** | [Font Awesome 6](https://fontawesome.com/) | Beautiful icons |
-| **Fonts** | [Inter (Google Fonts)](https://fonts.google.com/specimen/Inter) | Modern typography |
-| **Deployment** | GitHub Pages | Free hosting |
-
----
+| Technology | Purpose |
+|------------|---------|
+| **Frontend** | HTML5, CSS3, JavaScript (ES6+) |
+| **Backend** | Node.js, Express.js |
+| **API** | TMDB (The Movie Database) |
+| **Styling** | Custom CSS with glassmorphism |
+| **Icons** | Font Awesome |
+| **Fonts** | Inter (Google Fonts) |
 
 ## 🚀 Quick Start
 
 ### Prerequisites
+- Node.js (v14 or higher)
+- npm (v6 or higher)
+- TMDB API Key (optional for local development)
 
-- Modern web browser (Chrome, Firefox, Safari, Edge)
-- Internet connection for API access
-- TMDB API key (free)
-
-### Step 1: Get Your API Key
-
-1. **Visit TMDB**: https://www.themoviedb.org/settings/api
-2. **Sign up/Login** to your account
-3. **Request API key** (choose "Developer" option)
-4. **Copy your API key**
-
-### Step 2: Configure the App
+### Installation
 
 1. **Clone the repository**
-   ```bash
-   git clone https://github.com/Ateebkhan107/Movie-explorer.git
-   cd Movie-explorer
-   ```
+```bash
+git clone https://github.com/Ateebkhan107/Movie-explorer.git
+cd Movie-explorer
+```
 
-2. **Open `script.js`** and replace the API key:
-   ```javascript
-   const API_KEY = 'YOUR_ACTUAL_API_KEY_HERE'; // Replace this line
-   ```
+2. **Install dependencies**
+```bash
+npm install
+```
 
-3. **Open in your browser**
-   ```bash
-   # Simply open index.html in your browser
-   # Or use a local server:
-   python -m http.server 8000
-   # Then visit: http://localhost:8000
-   ```
+3. **Set up environment variables (optional)**
+```bash
+# Create .env file for local development
+echo TMDB_API_KEY=your_api_key_here > .env
+echo PORT=3000 >> .env
+```
 
-### Option 1: Use Live Demo (Recommended)
+4. **Start the development server**
+```bash
+npm run dev
+```
 
-Simply visit **[https://ateebkhan107.github.io/Movie-explorer/](https://ateebkhan107.github.io/Movie-explorer/)** to start exploring movies!
+5. **Open your browser**
+Navigate to `http://localhost:3000`
 
----
+## 🌐 How It Works
 
-## 🎮 How to Use
+### 🔐 **Secure Hybrid Architecture**
 
-### **Searching Movies**
-1. Type any movie title in the search box
-2. Results appear instantly as you type
-3. Click on any movie card for more details
+This app uses a **secure hybrid approach** that works in multiple scenarios:
 
-### **Filtering by Genre**
-1. Use the genre dropdown to select a category
-2. View movies filtered by your chosen genre
-3. Combine search and genre filters for precise results
+#### **GitHub Pages (Public Demo)**
+- ✅ **Real API Data**: Uses a public demo API key for live functionality
+- ✅ **No Personal Keys**: Your personal API keys are never exposed
+- ✅ **Full Functionality**: Search, filter, and browse real movies
+- ✅ **Rate Limited**: Safe for public use with TMDB's demo key
 
-### **Exploring Features**
-- **Hover Effects** - Cards lift and scale on hover
-- **Loading Animations** - Beautiful spinners during data fetch
-- **Responsive Design** - Works perfectly on all devices
+#### **Local Development (Private)**
+- 🔒 **Secure Backend**: Uses your personal API key via environment variables
+- 🔒 **Hidden Keys**: API keys stored securely in `.env` file
+- 🔒 **Full Access**: Unlimited API calls with your personal key
 
----
+#### **Production Deployment**
+- 🚀 **Backend Server**: Deploy with Node.js backend for maximum security
+- 🚀 **Environment Variables**: API keys stored securely on server
+- 🚀 **Professional Setup**: Enterprise-grade security
+
+## 🎯 How to Use
+
+1. **Search Movies**: Type in the search box to find movies by title
+2. **Filter by Genre**: Use the dropdown to filter by movie genre
+3. **Browse Results**: Click on movie cards to see details
+4. **Real-time Updates**: Results update automatically as you type
+
+## 🔧 API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/genres` | GET | Get movie genres |
+| `/api/movies` | GET | Get movies (with query/genre filters) |
+| `/api/health` | GET | Health check |
+| `/api/test` | GET | Test TMDB API connectivity |
+
+## 🔒 Security Features
+
+- **Rate Limiting** - Prevents API abuse
+- **Security Headers** - XSS protection, content type options
+- **CORS Configuration** - Configurable for production
+- **Input Validation** - Sanitized API requests
+- **Error Handling** - No sensitive data leakage
+- **Environment Variables** - Secure API key storage
+
+## 🎨 Customization
+
+### Changing Colors
+Edit the CSS variables in `style.css`:
+```css
+:root {
+  --primary-color: #667eea;
+  --secondary-color: #764ba2;
+  --accent-color: #ffd700;
+}
+```
+
+### Adding Features
+- New API endpoints in `index.js`
+- Frontend functionality in `script.js`
+- Styling updates in `style.css`
+
+## 📊 Environment Variables
+
+| Variable | Description | Required | Default |
+|----------|-------------|----------|---------|
+| `TMDB_API_KEY` | Your TMDB API key | No* | Demo key |
+| `PORT` | Server port | No | 3000 |
+| `NODE_ENV` | Environment mode | No | development |
+
+*Required only for local development with personal API key
 
 ## 📁 Project Structure
 
 ```
-Movie-explorer/
-├── 📄 index.html          # Main HTML file
-├── 🎨 style.css           # Beautiful CSS styles
-├── ⚡ script.js           # Interactive JavaScript (configure API key here)
-├── 📦 package.json        # Project configuration
-├── 🚀 index.js           # Express server (for local development)
-├── 📚 README.md          # This documentation
-├── 🔒 .gitignore         # Git ignore rules
-└── 📁 public/            # Static files (for server version)
-    ├── index.html
-    ├── style.css
-    └── script.js
+movie-explorer/
+├── public/           # Static files
+│   ├── index.html    # Main HTML file
+│   ├── style.css     # Styles
+│   └── script.js     # Frontend JavaScript
+├── index.js          # Express server
+├── package.json      # Dependencies and scripts
+├── .env              # Environment variables (private)
+├── .gitignore        # Git ignore rules
+└── README.md         # Project documentation
 ```
 
----
+## 🚀 Deployment Options
 
-## 🎨 Customization
+### Option 1: GitHub Pages (Current)
+- ✅ **Live Demo**: https://ateebkhan107.github.io/Movie-explorer/
+- ✅ **No Setup Required**: Works immediately
+- ✅ **Real API Data**: Uses secure demo key
+- ✅ **Free Hosting**: GitHub Pages hosting
 
-### **Changing Colors**
-Edit the CSS variables in `style.css`:
-```css
-:root {
-  --primary-color: #667eea;    /* Main gradient color */
-  --secondary-color: #764ba2;  /* Secondary gradient color */
-  --accent-color: #ffd700;     /* Gold accent color */
-}
+### Option 2: Deploy to Heroku
+```bash
+npm install -g heroku
+heroku login
+heroku create your-app-name
+heroku config:set TMDB_API_KEY=your_api_key_here
+git push heroku main
 ```
 
-### **Adding Features**
-- **New Search Options** - Modify `script.js` for additional filters
-- **Custom Styling** - Update `style.css` for different themes
-- **API Integration** - Add more movie data sources
+### Option 3: Deploy to Railway
+1. Connect your GitHub repository to Railway
+2. Set environment variables in Railway dashboard
+3. Deploy automatically on push
 
----
+### Option 4: Deploy to Vercel
+```bash
+npm i -g vercel
+vercel
+```
 
-## 🌐 Deployment Options
-
-### **GitHub Pages** ✅ (Current)
-- **URL**: https://ateebkhan107.github.io/Movie-explorer/
-- **Status**: Live and working
-- **Cost**: Free
-
-### **Other Platforms**
-- **Netlify** - Drag and drop deployment
-- **Vercel** - One-click deployment
-- **Firebase Hosting** - Google's hosting solution
-- **Heroku** - For full-stack version
-
----
-
-## 🔧 API Integration
-
-This app uses the [TMDB API](https://www.themoviedb.org/documentation/api) for movie data:
-
-- **Search Movies**: `/search/movie`
-- **Get Genres**: `/genre/movie/list`
-- **Popular Movies**: `/movie/popular`
-- **Discover Movies**: `/discover/movie`
-
-### **Security Best Practices**
-- ✅ **Never commit API keys** to version control
-- ✅ **Use environment variables** for production
-- ✅ **Keep API keys private** and secure
-- ✅ **Rotate keys regularly** for security
-
----
-
-## 📊 Performance Features
-
-- **Optimized Images** - TMDB provides multiple image sizes
-- **Lazy Loading** - Images load only when needed
-- **Debounced Search** - Reduces API calls during typing
-- **Caching** - Browser caches static assets
-- **Minimal Dependencies** - Fast loading with pure JavaScript
-
----
-
-## 🎯 Browser Support
-
-| Browser | Version | Status |
-|---------|---------|--------|
-| Chrome | 60+ | ✅ Full Support |
-| Firefox | 55+ | ✅ Full Support |
-| Safari | 12+ | ✅ Full Support |
-| Edge | 79+ | ✅ Full Support |
-| Mobile Browsers | Latest | ✅ Full Support |
-
----
+### Option 5: Deploy to DigitalOcean App Platform
+1. Connect your GitHub repository
+2. Set environment variables
+3. Deploy with one click
 
 ## 🤝 Contributing
 
-We welcome contributions! Here's how you can help:
-
-1. **Fork the repository**
-2. **Create a feature branch**
-   ```bash
-   git checkout -b feature/amazing-feature
-   ```
-3. **Make your changes**
-4. **Commit with a clear message**
-   ```bash
-   git commit -m 'Add amazing feature'
-   ```
-5. **Push to your branch**
-   ```bash
-   git push origin feature/amazing-feature
-   ```
-6. **Open a Pull Request**
-
-### **Ideas for Contributions**
-- 🎨 New themes and color schemes
-- 🔍 Additional search filters
-- 📱 Mobile app version
-- 🌍 Multi-language support
-- ⭐ User ratings and reviews
-
----
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## 📝 License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
-
----
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
-- **[TMDB](https://www.themoviedb.org/)** - For providing the comprehensive movie database API
-- **[Font Awesome](https://fontawesome.com/)** - For the beautiful icons that enhance the UI
-- **[Google Fonts](https://fonts.google.com/)** - For the Inter font family
-- **[GitHub Pages](https://pages.github.com/)** - For free hosting and deployment
+- [TMDB](https://www.themoviedb.org/) for providing the movie database API
+- [Font Awesome](https://fontawesome.com/) for the beautiful icons
+- [Google Fonts](https://fonts.google.com/) for the Inter font family
+
+## 📞 Support
+
+If you have any questions or need help with deployment, please open an issue on GitHub.
 
 ---
 
-## 📞 Support & Contact
-
-- **GitHub Issues**: [Report a bug](https://github.com/Ateebkhan107/Movie-explorer/issues)
-- **Live Demo**: [https://ateebkhan107.github.io/Movie-explorer/](https://ateebkhan107.github.io/Movie-explorer/)
-- **Repository**: [https://github.com/Ateebkhan107/Movie-explorer](https://github.com/Ateebkhan107/Movie-explorer)
-
----
-
-<div align="center">
-
-**Made with ❤️ by [Ateeb Khan](https://github.com/Ateebkhan107)**
-
-[![GitHub](https://img.shields.io/badge/GitHub-Ateebkhan107-black?style=for-the-badge&logo=github)](https://github.com/Ateebkhan107)
-
-*If you like this project, please give it a ⭐ star on GitHub!*
-
-</div> 
+**Made with ❤️ by Ateeb Khan** 

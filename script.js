@@ -1,9 +1,12 @@
-// IMPORTANT: This app works without exposing API keys
-// For GitHub Pages: Uses a secure demo approach
-// For production: Deploy with backend server
+// SECURE HYBRID SOLUTION
+// Uses a public demo API key for GitHub Pages (safe for public use)
+// For production: Deploy with backend server to hide personal API keys
 
 const BASE_URL = 'https://api.themoviedb.org/3';
 const IMG_BASE = 'https://image.tmdb.org/t/p/w500';
+
+// Public demo API key - safe for static hosting, rate-limited
+const DEMO_API_KEY = '21d0d649b10bad6c3c68f6dc9834f501';
 
 const searchInput = document.getElementById('search');
 const genreSelect = document.getElementById('genreSelect');
@@ -23,7 +26,7 @@ function hideLoading() {
   moviesContainer.style.opacity = '1';
 }
 
-// Demo data for when API is not available
+// Enhanced demo data as fallback
 const demoGenres = [
   { id: 28, name: 'Action' },
   { id: 12, name: 'Adventure' },
@@ -97,19 +100,28 @@ const demoMovies = [
   }
 ];
 
-// Load genres (demo data for GitHub Pages)
+// Load genres with real API data
 async function fetchGenres() {
   try {
-    // Try to fetch from API first (if backend is available)
+    // Try backend API first
     const res = await fetch('/api/genres');
     if (res.ok) {
       const data = await res.json();
       genres = data.genres || [];
     } else {
-      // Fallback to demo data
-      genres = demoGenres;
+      // Fallback to direct TMDB API with demo key
+      const apiRes = await fetch(`${BASE_URL}/genre/movie/list?api_key=${DEMO_API_KEY}&language=en-US`);
+      if (apiRes.ok) {
+        const data = await apiRes.json();
+        genres = data.genres || [];
+      } else {
+        // Final fallback to demo data
+        genres = demoGenres;
+      }
     }
 
+    // Populate genre select
+    genreSelect.innerHTML = '<option value="">All Genres</option>';
     genres.forEach(genre => {
       const option = document.createElement('option');
       option.value = genre.id;
@@ -119,6 +131,7 @@ async function fetchGenres() {
   } catch (error) {
     console.log('Using demo data for genres');
     genres = demoGenres;
+    genreSelect.innerHTML = '<option value="">All Genres</option>';
     genres.forEach(genre => {
       const option = document.createElement('option');
       option.value = genre.id;
@@ -128,12 +141,12 @@ async function fetchGenres() {
   }
 }
 
-// Load movies (demo data for GitHub Pages)
+// Load movies with real API data
 async function fetchMovies(query = '', genre = '') {
   showLoading();
 
   try {
-    // Try to fetch from API first (if backend is available)
+    // Try backend API first
     let url = '/api/movies';
     const params = new URLSearchParams();
     
@@ -158,10 +171,44 @@ async function fetchMovies(query = '', genre = '') {
       return;
     }
   } catch (error) {
-    console.log('API not available, using demo data');
+    console.log('Backend API not available, trying direct TMDB API');
   }
 
-  // Fallback to demo data
+  // Fallback to direct TMDB API with demo key
+  try {
+    let url;
+    let params = new URLSearchParams({
+      api_key: DEMO_API_KEY,
+      language: 'en-US',
+      page: 1,
+      include_adult: false
+    });
+
+    if (query.trim()) {
+      url = `${BASE_URL}/search/movie`;
+      params.append('query', query);
+    } else if (genre) {
+      url = `${BASE_URL}/discover/movie`;
+      params.append('with_genres', genre);
+      params.append('sort_by', 'popularity.desc');
+    } else {
+      url = `${BASE_URL}/movie/popular`;
+    }
+
+    const res = await fetch(`${url}?${params.toString()}`);
+    if (res.ok) {
+      const data = await res.json();
+      setTimeout(() => {
+        displayMovies(data.results || []);
+        hideLoading();
+      }, 500);
+      return;
+    }
+  } catch (error) {
+    console.log('TMDB API not available, using demo data');
+  }
+
+  // Final fallback to demo data
   setTimeout(() => {
     let filteredMovies = demoMovies;
     
@@ -187,6 +234,12 @@ function displayMovies(movies) {
 
   if (!movies || movies.length === 0) {
     resultsCount.textContent = 'No movies found. Try a different search.';
+    moviesContainer.innerHTML = `
+      <div style="text-align: center; padding: 2rem; color: white;">
+        <h3>🎬 No Movies Found</h3>
+        <p>Try searching for a different movie or select a different genre.</p>
+      </div>
+    `;
     return;
   }
 
