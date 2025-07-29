@@ -121,7 +121,7 @@ body {
 
 .search-box, .filter-box {
   position: relative;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(10px);
   border-radius: 50px;
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -129,7 +129,7 @@ body {
 }
 
 .search-box:hover, .filter-box:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.95);
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
@@ -139,7 +139,7 @@ body {
   left: 20px;
   top: 50%;
   transform: translateY(-50%);
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(0, 0, 0, 0.7);
   z-index: 1;
 }
 
@@ -148,19 +148,19 @@ body {
   padding: 15px 20px 15px 50px;
   background: transparent;
   border: none;
-  color: white;
+  color: black;
   font-size: 1rem;
   outline: none;
   border-radius: 50px;
 }
 
 .search-box input:focus, .filter-box select:focus {
-  background: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
 }
 
 .search-box input::placeholder {
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(0, 0, 0, 0.6);
 }
 
 .filter-box select {
