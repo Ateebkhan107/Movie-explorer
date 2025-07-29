@@ -1,4 +1,6 @@
-const API_KEY = '21d0d649b10bad6c3c68f6dc9834f501'; // Your TMDB API key
+// IMPORTANT: Replace this with your own TMDB API key
+// Get your free API key from: https://www.themoviedb.org/settings/api
+const API_KEY = 'YOUR_TMDB_API_KEY_HERE'; // Replace with your actual API key
 const BASE_URL = 'https://api.themoviedb.org/3';
 const IMG_BASE = 'https://image.tmdb.org/t/p/w500';
 
@@ -9,6 +11,19 @@ const resultsCount = document.getElementById('resultsCount');
 const loadingSpinner = document.getElementById('loadingSpinner');
 
 let genres = [];
+
+// Check if API key is configured
+if (API_KEY === 'YOUR_TMDB_API_KEY_HERE') {
+  moviesContainer.innerHTML = `
+    <div style="text-align: center; padding: 2rem; color: white;">
+      <h3>⚠️ API Key Required</h3>
+      <p>Please configure your TMDB API key in script.js</p>
+      <p>Get your free API key from: <a href="https://www.themoviedb.org/settings/api" target="_blank" style="color: #ffd700;">TMDB API Settings</a></p>
+    </div>
+  `;
+  resultsCount.textContent = 'API Key not configured';
+  throw new Error('TMDB API key not configured');
+}
 
 function showLoading() {
   loadingSpinner.classList.add('show');

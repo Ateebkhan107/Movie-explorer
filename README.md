@@ -15,6 +15,18 @@
 
 ---
 
+## 🔒 Security Notice
+
+**⚠️ IMPORTANT**: This app requires a TMDB API key to function. For security reasons, no API keys are included in this repository.
+
+### **Getting Your API Key**
+1. Visit [TMDB API Settings](https://www.themoviedb.org/settings/api)
+2. Sign up for a free account
+3. Request an API key (Developer option)
+4. Replace `YOUR_TMDB_API_KEY_HERE` in `script.js` with your actual key
+
+---
+
 ## ✨ Live Demo
 
 **🌐 [View Live App](https://ateebkhan107.github.io/Movie-explorer/)**
@@ -69,13 +81,16 @@ Experience the app in action with real-time movie search, filtering, and beautif
 
 - Modern web browser (Chrome, Firefox, Safari, Edge)
 - Internet connection for API access
-- No installation required! 🎉
+- TMDB API key (free)
 
-### Option 1: Use Live Demo (Recommended)
+### Step 1: Get Your API Key
 
-Simply visit **[https://ateebkhan107.github.io/Movie-explorer/](https://ateebkhan107.github.io/Movie-explorer/)** to start exploring movies!
+1. **Visit TMDB**: https://www.themoviedb.org/settings/api
+2. **Sign up/Login** to your account
+3. **Request API key** (choose "Developer" option)
+4. **Copy your API key**
 
-### Option 2: Run Locally
+### Step 2: Configure the App
 
 1. **Clone the repository**
    ```bash
@@ -83,13 +98,22 @@ Simply visit **[https://ateebkhan107.github.io/Movie-explorer/](https://ateebkha
    cd Movie-explorer
    ```
 
-2. **Open in your browser**
+2. **Open `script.js`** and replace the API key:
+   ```javascript
+   const API_KEY = 'YOUR_ACTUAL_API_KEY_HERE'; // Replace this line
+   ```
+
+3. **Open in your browser**
    ```bash
    # Simply open index.html in your browser
    # Or use a local server:
    python -m http.server 8000
    # Then visit: http://localhost:8000
    ```
+
+### Option 1: Use Live Demo (Recommended)
+
+Simply visit **[https://ateebkhan107.github.io/Movie-explorer/](https://ateebkhan107.github.io/Movie-explorer/)** to start exploring movies!
 
 ---
 
@@ -118,7 +142,7 @@ Simply visit **[https://ateebkhan107.github.io/Movie-explorer/](https://ateebkha
 Movie-explorer/
 ├── 📄 index.html          # Main HTML file
 ├── 🎨 style.css           # Beautiful CSS styles
-├── ⚡ script.js           # Interactive JavaScript
+├── ⚡ script.js           # Interactive JavaScript (configure API key here)
 ├── 📦 package.json        # Project configuration
 ├── 🚀 index.js           # Express server (for local development)
 ├── 📚 README.md          # This documentation
@@ -174,11 +198,11 @@ This app uses the [TMDB API](https://www.themoviedb.org/documentation/api) for m
 - **Popular Movies**: `/movie/popular`
 - **Discover Movies**: `/discover/movie`
 
-### **Getting Your Own API Key**
-1. Visit [TMDB Settings](https://www.themoviedb.org/settings/api)
-2. Sign up for a free account
-3. Request an API key
-4. Replace the API key in `script.js`
+### **Security Best Practices**
+- ✅ **Never commit API keys** to version control
+- ✅ **Use environment variables** for production
+- ✅ **Keep API keys private** and secure
+- ✅ **Rotate keys regularly** for security
 
 ---
 

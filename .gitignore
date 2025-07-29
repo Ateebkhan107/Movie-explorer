@@ -10,6 +10,14 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
+.env.*
+
+# API Keys and Secrets
+*.key
+*.pem
+secrets.json
+config.json
+api-keys.txt
 
 # Logs
 logs
@@ -67,4 +75,10 @@ build/
 
 # Temporary files
 tmp/
-temp/ 
+temp/
+
+# Security files
+*.pem
+*.key
+secrets/
+config/ 
