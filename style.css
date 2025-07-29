@@ -173,6 +173,33 @@ body {
   padding-right: 50px;
 }
 
+/* Fix select dropdown options visibility */
+.filter-box select option {
+  background-color: #2a2a2a;
+  color: white;
+  padding: 10px;
+  font-size: 1rem;
+}
+
+/* Style for when select is opened */
+.filter-box select:focus option {
+  background-color: #3a3a3a;
+  color: white;
+}
+
+/* Hover effect for options */
+.filter-box select option:hover {
+  background-color: #667eea;
+  color: white;
+}
+
+/* Selected option styling */
+.filter-box select option:checked {
+  background-color: #667eea;
+  color: white;
+  font-weight: 600;
+}
+
 /* Results Info */
 .results-info {
   text-align: center;
