@@ -1,7 +1,7 @@
-// IMPORTANT: Replace this with your own TMDB API key
-// Get your free API key from: https://www.themoviedb.org/settings/api
-const API_KEY = 'YOUR_TMDB_API_KEY_HERE'; // Replace with your actual API key
-const BASE_URL = 'https://api.themoviedb.org/3';
+// IMPORTANT: This app uses a secure backend proxy to hide API keys
+// The API key is stored securely on the server, not in the frontend code
+
+const BASE_URL = '/api'; // Use our backend proxy instead of direct TMDB API
 const IMG_BASE = 'https://image.tmdb.org/t/p/w500';
 
 const searchInput = document.getElementById('search');
@@ -11,19 +11,6 @@ const resultsCount = document.getElementById('resultsCount');
 const loadingSpinner = document.getElementById('loadingSpinner');
 
 let genres = [];
-
-// Check if API key is configured
-if (API_KEY === 'YOUR_TMDB_API_KEY_HERE') {
-  moviesContainer.innerHTML = `
-    <div style="text-align: center; padding: 2rem; color: white;">
-      <h3>⚠️ API Key Required</h3>
-      <p>Please configure your TMDB API key in script.js</p>
-      <p>Get your free API key from: <a href="https://www.themoviedb.org/settings/api" target="_blank" style="color: #ffd700;">TMDB API Settings</a></p>
-    </div>
-  `;
-  resultsCount.textContent = 'API Key not configured';
-  throw new Error('TMDB API key not configured');
-}
 
 function showLoading() {
   loadingSpinner.classList.add('show');
@@ -35,12 +22,15 @@ function hideLoading() {
   moviesContainer.style.opacity = '1';
 }
 
-// Fetch genres directly from TMDB API
+// Fetch genres through our secure backend
 async function fetchGenres() {
   try {
-    const res = await fetch(`${BASE_URL}/genre/movie/list?api_key=${API_KEY}&language=en-US`);
+    const res = await fetch(`${BASE_URL}/genres`);
+    if (!res.ok) {
+      throw new Error('Failed to fetch genres');
+    }
     const data = await res.json();
-    genres = data.genres;
+    genres = data.genres || [];
 
     genres.forEach(genre => {
       const option = document.createElement('option');
@@ -50,48 +40,67 @@ async function fetchGenres() {
     });
   } catch (error) {
     console.error('Error fetching genres:', error);
+    // Show fallback message
+    resultsCount.textContent = 'Unable to load genres. Please try again later.';
   }
 }
 
-// Fetch movies directly from TMDB API
+// Fetch movies through our secure backend
 async function fetchMovies(query = '', genre = '') {
   showLoading();
 
   try {
-    let url;
-    let params = new URLSearchParams({
-      api_key: API_KEY,
-      language: 'en-US',
-      page: 1,
-      include_adult: false
-    });
-
+    let url = `${BASE_URL}/movies`;
+    const params = new URLSearchParams();
+    
     if (query.trim()) {
-      url = `${BASE_URL}/search/movie?${params}&query=${encodeURIComponent(query)}`;
-    } else if (genre) {
-      url = `${BASE_URL}/discover/movie?${params}&with_genres=${genre}&sort_by=popularity.desc`;
-    } else {
-      url = `${BASE_URL}/movie/popular?${params}`;
+      params.append('query', query);
+    }
+    if (genre) {
+      params.append('genre', genre);
+    }
+
+    if (params.toString()) {
+      url += `?${params.toString()}`;
     }
 
     const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error('Failed to fetch movies');
+    }
+    
     const data = await res.json();
 
     setTimeout(() => {
-      displayMovies(data.results);
+      displayMovies(data.results || []);
       hideLoading();
     }, 500);
   } catch (error) {
     console.error('Error fetching movies:', error);
     hideLoading();
     resultsCount.textContent = 'Error loading movies. Please try again.';
+    
+    // Show helpful error message
+    moviesContainer.innerHTML = `
+      <div style="text-align: center; padding: 2rem; color: white;">
+        <h3>⚠️ Connection Error</h3>
+        <p>Unable to connect to the movie database.</p>
+        <p>This might be due to:</p>
+        <ul style="text-align: left; max-width: 400px; margin: 1rem auto;">
+          <li>Network connectivity issues</li>
+          <li>API service temporarily unavailable</li>
+          <li>Server configuration</li>
+        </ul>
+        <p>Please try again later or check your internet connection.</p>
+      </div>
+    `;
   }
 }
 
 function displayMovies(movies) {
   moviesContainer.innerHTML = '';
 
-  if (movies.length === 0) {
+  if (!movies || movies.length === 0) {
     resultsCount.textContent = 'No movies found. Try a different search.';
     return;
   }
