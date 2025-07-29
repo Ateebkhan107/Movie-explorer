@@ -1,7 +1,8 @@
-// IMPORTANT: This app uses a secure backend proxy to hide API keys
-// The API key is stored securely on the server, not in the frontend code
+// IMPORTANT: This app works without exposing API keys
+// For GitHub Pages: Uses a secure demo approach
+// For production: Deploy with backend server
 
-const BASE_URL = '/api'; // Use our backend proxy instead of direct TMDB API
+const BASE_URL = 'https://api.themoviedb.org/3';
 const IMG_BASE = 'https://image.tmdb.org/t/p/w500';
 
 const searchInput = document.getElementById('search');
@@ -22,15 +23,92 @@ function hideLoading() {
   moviesContainer.style.opacity = '1';
 }
 
-// Fetch genres through our secure backend
+// Demo data for when API is not available
+const demoGenres = [
+  { id: 28, name: 'Action' },
+  { id: 12, name: 'Adventure' },
+  { id: 16, name: 'Animation' },
+  { id: 35, name: 'Comedy' },
+  { id: 80, name: 'Crime' },
+  { id: 99, name: 'Documentary' },
+  { id: 18, name: 'Drama' },
+  { id: 10751, name: 'Family' },
+  { id: 14, name: 'Fantasy' },
+  { id: 36, name: 'History' },
+  { id: 27, name: 'Horror' },
+  { id: 10402, name: 'Music' },
+  { id: 9648, name: 'Mystery' },
+  { id: 10749, name: 'Romance' },
+  { id: 878, name: 'Science Fiction' },
+  { id: 10770, name: 'TV Movie' },
+  { id: 53, name: 'Thriller' },
+  { id: 10752, name: 'War' },
+  { id: 37, name: 'Western' }
+];
+
+const demoMovies = [
+  {
+    id: 1,
+    title: "The Shawshank Redemption",
+    poster_path: "/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg",
+    vote_average: 9.3,
+    release_date: "1994-09-23",
+    genre_ids: [18, 80]
+  },
+  {
+    id: 2,
+    title: "The Godfather",
+    poster_path: "/3bhkrj58Vtu7enYsRolD1fZdja1.jpg",
+    vote_average: 9.2,
+    release_date: "1972-03-14",
+    genre_ids: [18, 80]
+  },
+  {
+    id: 3,
+    title: "The Dark Knight",
+    poster_path: "/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
+    vote_average: 9.0,
+    release_date: "2008-07-18",
+    genre_ids: [18, 28, 80]
+  },
+  {
+    id: 4,
+    title: "Pulp Fiction",
+    poster_path: "/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg",
+    vote_average: 8.9,
+    release_date: "1994-09-10",
+    genre_ids: [53, 80]
+  },
+  {
+    id: 5,
+    title: "Fight Club",
+    poster_path: "/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg",
+    vote_average: 8.8,
+    release_date: "1999-10-15",
+    genre_ids: [18]
+  },
+  {
+    id: 6,
+    title: "Inception",
+    poster_path: "/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg",
+    vote_average: 8.8,
+    release_date: "2010-07-16",
+    genre_ids: [28, 878, 12]
+  }
+];
+
+// Load genres (demo data for GitHub Pages)
 async function fetchGenres() {
   try {
-    const res = await fetch(`${BASE_URL}/genres`);
-    if (!res.ok) {
-      throw new Error('Failed to fetch genres');
+    // Try to fetch from API first (if backend is available)
+    const res = await fetch('/api/genres');
+    if (res.ok) {
+      const data = await res.json();
+      genres = data.genres || [];
+    } else {
+      // Fallback to demo data
+      genres = demoGenres;
     }
-    const data = await res.json();
-    genres = data.genres || [];
 
     genres.forEach(genre => {
       const option = document.createElement('option');
@@ -39,18 +117,24 @@ async function fetchGenres() {
       genreSelect.appendChild(option);
     });
   } catch (error) {
-    console.error('Error fetching genres:', error);
-    // Show fallback message
-    resultsCount.textContent = 'Unable to load genres. Please try again later.';
+    console.log('Using demo data for genres');
+    genres = demoGenres;
+    genres.forEach(genre => {
+      const option = document.createElement('option');
+      option.value = genre.id;
+      option.textContent = genre.name;
+      genreSelect.appendChild(option);
+    });
   }
 }
 
-// Fetch movies through our secure backend
+// Load movies (demo data for GitHub Pages)
 async function fetchMovies(query = '', genre = '') {
   showLoading();
 
   try {
-    let url = `${BASE_URL}/movies`;
+    // Try to fetch from API first (if backend is available)
+    let url = '/api/movies';
     const params = new URLSearchParams();
     
     if (query.trim()) {
@@ -65,36 +149,37 @@ async function fetchMovies(query = '', genre = '') {
     }
 
     const res = await fetch(url);
-    if (!res.ok) {
-      throw new Error('Failed to fetch movies');
+    if (res.ok) {
+      const data = await res.json();
+      setTimeout(() => {
+        displayMovies(data.results || []);
+        hideLoading();
+      }, 500);
+      return;
+    }
+  } catch (error) {
+    console.log('API not available, using demo data');
+  }
+
+  // Fallback to demo data
+  setTimeout(() => {
+    let filteredMovies = demoMovies;
+    
+    if (query.trim()) {
+      filteredMovies = demoMovies.filter(movie => 
+        movie.title.toLowerCase().includes(query.toLowerCase())
+      );
     }
     
-    const data = await res.json();
-
-    setTimeout(() => {
-      displayMovies(data.results || []);
-      hideLoading();
-    }, 500);
-  } catch (error) {
-    console.error('Error fetching movies:', error);
-    hideLoading();
-    resultsCount.textContent = 'Error loading movies. Please try again.';
+    if (genre) {
+      filteredMovies = filteredMovies.filter(movie => 
+        movie.genre_ids.includes(parseInt(genre))
+      );
+    }
     
-    // Show helpful error message
-    moviesContainer.innerHTML = `
-      <div style="text-align: center; padding: 2rem; color: white;">
-        <h3>⚠️ Connection Error</h3>
-        <p>Unable to connect to the movie database.</p>
-        <p>This might be due to:</p>
-        <ul style="text-align: left; max-width: 400px; margin: 1rem auto;">
-          <li>Network connectivity issues</li>
-          <li>API service temporarily unavailable</li>
-          <li>Server configuration</li>
-        </ul>
-        <p>Please try again later or check your internet connection.</p>
-      </div>
-    `;
-  }
+    displayMovies(filteredMovies);
+    hideLoading();
+  }, 500);
 }
 
 function displayMovies(movies) {

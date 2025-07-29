@@ -9,7 +9,14 @@ const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 const BASE_URL = 'https://api.themoviedb.org/3';
-const API_KEY = process.env.TMDB_API_KEY || '21d0d649b10bad6c3c68f6dc9834f501';
+const API_KEY = process.env.TMDB_API_KEY;
+
+// Check if API key is configured
+if (!API_KEY) {
+  console.error('❌ TMDB_API_KEY environment variable is not set!');
+  console.error('Please add TMDB_API_KEY=your_api_key to your .env file');
+  process.exit(1);
+}
 
 // Configure axios with production settings
 const apiClient = axios.create({
