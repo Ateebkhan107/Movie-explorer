@@ -103,42 +103,53 @@ const demoMovies = [
 // Load genres with real API data
 async function fetchGenres() {
   try {
-    // Try backend API first
-    const res = await fetch('/api/genres');
+    // Try backend API first (with timeout)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+    
+    const res = await fetch('/api/genres', { 
+      signal: controller.signal,
+      headers: { 'Accept': 'application/json' }
+    });
+    clearTimeout(timeoutId);
+    
     if (res.ok) {
       const data = await res.json();
       genres = data.genres || [];
+      console.log('✅ Using backend API for genres');
     } else {
+      throw new Error('Backend API failed');
+    }
+  } catch (error) {
+    console.log('🔄 Backend API not available, trying direct TMDB API');
+    
+    try {
       // Fallback to direct TMDB API with demo key
-      const apiRes = await fetch(`${BASE_URL}/genre/movie/list?api_key=${DEMO_API_KEY}&language=en-US`);
+      const apiRes = await fetch(`${BASE_URL}/genre/movie/list?api_key=${DEMO_API_KEY}&language=en-US`, {
+        headers: { 'Accept': 'application/json' }
+      });
+      
       if (apiRes.ok) {
         const data = await apiRes.json();
         genres = data.genres || [];
+        console.log('✅ Using direct TMDB API for genres');
       } else {
-        // Final fallback to demo data
-        genres = demoGenres;
+        throw new Error('TMDB API failed');
       }
+    } catch (apiError) {
+      console.log('🔄 TMDB API not available, using demo data');
+      genres = demoGenres;
     }
-
-    // Populate genre select
-    genreSelect.innerHTML = '<option value="">All Genres</option>';
-    genres.forEach(genre => {
-      const option = document.createElement('option');
-      option.value = genre.id;
-      option.textContent = genre.name;
-      genreSelect.appendChild(option);
-    });
-  } catch (error) {
-    console.log('Using demo data for genres');
-    genres = demoGenres;
-    genreSelect.innerHTML = '<option value="">All Genres</option>';
-    genres.forEach(genre => {
-      const option = document.createElement('option');
-      option.value = genre.id;
-      option.textContent = genre.name;
-      genreSelect.appendChild(option);
-    });
   }
+
+  // Populate genre select
+  genreSelect.innerHTML = '<option value="">All Genres</option>';
+  genres.forEach(genre => {
+    const option = document.createElement('option');
+    option.value = genre.id;
+    option.textContent = genre.name;
+    genreSelect.appendChild(option);
+  });
 }
 
 // Load movies with real API data
@@ -146,7 +157,10 @@ async function fetchMovies(query = '', genre = '') {
   showLoading();
 
   try {
-    // Try backend API first
+    // Try backend API first (with timeout)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    
     let url = '/api/movies';
     const params = new URLSearchParams();
     
@@ -161,17 +175,25 @@ async function fetchMovies(query = '', genre = '') {
       url += `?${params.toString()}`;
     }
 
-    const res = await fetch(url);
+    const res = await fetch(url, { 
+      signal: controller.signal,
+      headers: { 'Accept': 'application/json' }
+    });
+    clearTimeout(timeoutId);
+    
     if (res.ok) {
       const data = await res.json();
+      console.log('✅ Using backend API for movies');
       setTimeout(() => {
         displayMovies(data.results || []);
         hideLoading();
-      }, 500);
+      }, 300);
       return;
+    } else {
+      throw new Error('Backend API failed');
     }
   } catch (error) {
-    console.log('Backend API not available, trying direct TMDB API');
+    console.log('🔄 Backend API not available, trying direct TMDB API');
   }
 
   // Fallback to direct TMDB API with demo key
@@ -195,17 +217,23 @@ async function fetchMovies(query = '', genre = '') {
       url = `${BASE_URL}/movie/popular`;
     }
 
-    const res = await fetch(`${url}?${params.toString()}`);
+    const res = await fetch(`${url}?${params.toString()}`, {
+      headers: { 'Accept': 'application/json' }
+    });
+    
     if (res.ok) {
       const data = await res.json();
+      console.log('✅ Using direct TMDB API for movies');
       setTimeout(() => {
         displayMovies(data.results || []);
         hideLoading();
-      }, 500);
+      }, 300);
       return;
+    } else {
+      throw new Error('TMDB API failed');
     }
   } catch (error) {
-    console.log('TMDB API not available, using demo data');
+    console.log('🔄 TMDB API not available, using demo data');
   }
 
   // Final fallback to demo data
@@ -224,9 +252,10 @@ async function fetchMovies(query = '', genre = '') {
       );
     }
     
+    console.log('✅ Using demo data for movies');
     displayMovies(filteredMovies);
     hideLoading();
-  }, 500);
+  }, 300);
 }
 
 function displayMovies(movies) {

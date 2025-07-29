@@ -15,15 +15,20 @@ const API_KEY = process.env.TMDB_API_KEY;
 if (!API_KEY) {
   console.error('❌ TMDB_API_KEY environment variable is not set!');
   console.error('Please add TMDB_API_KEY=your_api_key to your .env file');
-  process.exit(1);
+  console.log('🔄 Running in demo mode with fallback data');
 }
 
 // Configure axios with production settings
 const apiClient = axios.create({
-  timeout: 15000,
+  timeout: 10000, // Reduced timeout
   headers: {
     'User-Agent': 'MovieExplorer/1.0',
-    'Accept': 'application/json'
+    'Accept': 'application/json',
+    'Connection': 'keep-alive'
+  },
+  // Add retry configuration
+  validateStatus: function (status) {
+    return status >= 200 && status < 300; // Accept only 2xx status codes
   }
 });
 
@@ -78,16 +83,20 @@ const apiLimiter = rateLimit({
 
 app.use('/api/', apiLimiter);
 
-// Retry function with exponential backoff
-async function retryRequest(fn, maxRetries = 3) {
+// Improved retry function with exponential backoff
+async function retryRequest(fn, maxRetries = 2) {
   for (let i = 0; i < maxRetries; i++) {
     try {
       return await fn();
     } catch (error) {
-      if (i === maxRetries - 1) throw error;
-      
-      const delay = Math.min(1000 * Math.pow(2, i), 5000); // Exponential backoff, max 5s
       console.log(`Retry ${i + 1}/${maxRetries} after error:`, error.message);
+      
+      if (i === maxRetries - 1) {
+        throw error;
+      }
+      
+      // Shorter delays for faster fallback
+      const delay = Math.min(500 * Math.pow(2, i), 2000); // Max 2s delay
       await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
@@ -95,6 +104,13 @@ async function retryRequest(fn, maxRetries = 3) {
 
 // API Routes
 app.get('/api/genres', async (req, res) => {
+  if (!API_KEY) {
+    return res.status(503).json({ 
+      error: 'API key not configured',
+      message: 'Please configure TMDB_API_KEY in your environment'
+    });
+  }
+
   try {
     const response = await retryRequest(() => 
       apiClient.get(`${BASE_URL}/genre/movie/list`, {
@@ -115,6 +131,13 @@ app.get('/api/genres', async (req, res) => {
 });
 
 app.get('/api/movies', async (req, res) => {
+  if (!API_KEY) {
+    return res.status(503).json({ 
+      error: 'API key not configured',
+      message: 'Please configure TMDB_API_KEY in your environment'
+    });
+  }
+
   try {
     const { query = '', genre = '', page = 1 } = req.query;
     let url;
@@ -156,12 +179,20 @@ app.get('/api/health', (req, res) => {
     message: 'Server is running',
     timestamp: new Date().toISOString(),
     environment: NODE_ENV,
-    version: '1.0.0'
+    version: '1.0.0',
+    apiKeyConfigured: !!API_KEY
   });
 });
 
 // Test TMDB API connectivity
 app.get('/api/test', async (req, res) => {
+  if (!API_KEY) {
+    return res.status(503).json({ 
+      status: 'API key not configured',
+      message: 'Please configure TMDB_API_KEY in your environment'
+    });
+  }
+
   try {
     const response = await apiClient.get(`${BASE_URL}/movie/popular`, {
       params: {
@@ -223,6 +254,10 @@ const server = app.listen(PORT, () => {
   console.log(`🔑 API Key configured: ${API_KEY ? 'Yes' : 'No'}`);
   console.log(`🌍 Environment: ${NODE_ENV}`);
   console.log(`🌐 Test API connectivity: http://localhost:${PORT}/api/test`);
+  
+  if (!API_KEY) {
+    console.log('⚠️  Running in demo mode - frontend will use direct TMDB API');
+  }
 });
 
 // Handle server errors
