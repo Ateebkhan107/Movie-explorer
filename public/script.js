@@ -1,3 +1,5 @@
+const API_KEY = '21d0d649b10bad6c3c68f6dc9834f501'; // Your TMDB API key
+const BASE_URL = 'https://api.themoviedb.org/3';
 const IMG_BASE = 'https://image.tmdb.org/t/p/w500';
 
 const searchInput = document.getElementById('search');
@@ -18,22 +20,12 @@ function hideLoading() {
   moviesContainer.style.opacity = '1';
 }
 
-// ✅ Uses your backend instead of TMDB directly
+// Fetch genres directly from TMDB API
 async function fetchGenres() {
   try {
-    const res = await fetch('/api/genres');
-    
-    if (!res.ok) {
-      throw new Error(`HTTP error! status: ${res.status}`);
-    }
-    
+    const res = await fetch(`${BASE_URL}/genre/movie/list?api_key=${API_KEY}&language=en-US`);
     const data = await res.json();
-    
-    if (data.error) {
-      throw new Error(data.error);
-    }
-    
-    genres = data.genres || [];
+    genres = data.genres;
 
     genres.forEach(genre => {
       const option = document.createElement('option');
@@ -43,39 +35,41 @@ async function fetchGenres() {
     });
   } catch (error) {
     console.error('Error fetching genres:', error);
-    // Add a fallback option
-    const option = document.createElement('option');
-    option.value = '';
-    option.textContent = 'Genres unavailable';
-    genreSelect.appendChild(option);
   }
 }
 
+// Fetch movies directly from TMDB API
 async function fetchMovies(query = '', genre = '') {
   showLoading();
 
   try {
-    const res = await fetch(`/api/movies?query=${encodeURIComponent(query)}&genre=${genre}`);
-    
-    if (!res.ok) {
-      throw new Error(`HTTP error! status: ${res.status}`);
+    let url;
+    let params = new URLSearchParams({
+      api_key: API_KEY,
+      language: 'en-US',
+      page: 1,
+      include_adult: false
+    });
+
+    if (query.trim()) {
+      url = `${BASE_URL}/search/movie?${params}&query=${encodeURIComponent(query)}`;
+    } else if (genre) {
+      url = `${BASE_URL}/discover/movie?${params}&with_genres=${genre}&sort_by=popularity.desc`;
+    } else {
+      url = `${BASE_URL}/movie/popular?${params}`;
     }
-    
+
+    const res = await fetch(url);
     const data = await res.json();
 
-    if (data.error) {
-      throw new Error(data.error);
-    }
-
     setTimeout(() => {
-      displayMovies(data.results || []);
+      displayMovies(data.results);
       hideLoading();
     }, 500);
   } catch (error) {
     console.error('Error fetching movies:', error);
     hideLoading();
-    moviesContainer.innerHTML = '';
-    resultsCount.textContent = 'Error loading movies. Please check your connection and try again.';
+    resultsCount.textContent = 'Error loading movies. Please try again.';
   }
 }
 
@@ -109,7 +103,7 @@ function displayMovies(movies) {
       'https://via.placeholder.com/300x450/667eea/ffffff?text=No+Image';
 
     card.innerHTML = `
-      <img src="${poster}" alt="${movie.title}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x450/667eea/ffffff?text=No+Image'">
+      <img src="${poster}" alt="${movie.title}" loading="lazy">
       <div class="movie-info">
         <h3>${movie.title}</h3>
         <div class="movie-meta">
@@ -134,16 +128,8 @@ function displayMovies(movies) {
       }, 150);
     });
 
-    // Set initial animation state
-    card.style.opacity = '0';
-    card.style.transform = 'translateY(20px)';
-    card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-
     moviesContainer.appendChild(card);
   });
-
-  // Apply intersection observer to newly created cards
-  setupCardAnimations();
 }
 
 function debounce(func, wait) {
@@ -171,8 +157,7 @@ async function init() {
   await fetchMovies();
 }
 
-// Setup intersection observer for card animations
-function setupCardAnimations() {
+document.addEventListener('DOMContentLoaded', () => {
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -180,15 +165,15 @@ function setupCardAnimations() {
         entry.target.style.transform = 'translateY(0)';
       }
     });
-  }, {
-    threshold: 0.1,
-    rootMargin: '50px'
   });
 
   const movieCards = document.querySelectorAll('.movie-card');
   movieCards.forEach(card => {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(20px)';
+    card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
     observer.observe(card);
   });
-}
+});
 
 init();
