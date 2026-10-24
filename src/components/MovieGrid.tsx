@@ -3,11 +3,12 @@
 import { Movie } from '@/types';
 import MovieCard from './MovieCard';
 import SkeletonCard from './SkeletonCard';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 interface MovieGridProps {
   movies: Movie[];
   isLoading: boolean;
+  isLoadingMore?: boolean;
   onMovieClick: (movie: Movie) => void;
   emptyMessage?: string;
 }
@@ -15,13 +16,14 @@ interface MovieGridProps {
 export default function MovieGrid({ 
   movies, 
   isLoading, 
+  isLoadingMore = false,
   onMovieClick,
   emptyMessage = "No movies found." 
 }: MovieGridProps) {
   
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5 sm:gap-6">
         {Array.from({ length: 10 }).map((_, i) => (
           <SkeletonCard key={i} />
         ))}
@@ -35,28 +37,31 @@ export default function MovieGrid({
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-white/10 backdrop-blur-md p-8 rounded-2xl border border-white/20"
+          className="bg-white/10 backdrop-blur-md p-8 rounded-2xl border border-white/20 max-w-md mx-auto"
         >
           <span className="text-4xl mb-4 block">🎬</span>
-          <h3 className="text-xl font-semibold mb-2">No Movies Found</h3>
-          <p className="text-white/70">{emptyMessage}</p>
+          <h3 className="text-xl font-semibold mb-2 text-white">No Movies Found</h3>
+          <p className="text-white/70 text-sm">{emptyMessage}</p>
         </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-      <AnimatePresence mode="popLayout">
-        {movies.map((movie, index) => (
-          <MovieCard 
-            key={movie.id} 
-            movie={movie} 
-            index={index} 
-            onClick={onMovieClick} 
-          />
-        ))}
-      </AnimatePresence>
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5 sm:gap-6">
+      {movies.map((movie, index) => (
+        <MovieCard 
+          key={`${movie.id}-${index}`} 
+          movie={movie} 
+          index={index} 
+          onClick={onMovieClick} 
+        />
+      ))}
+      {isLoadingMore && (
+        Array.from({ length: 5 }).map((_, i) => (
+          <SkeletonCard key={`more-skeleton-${i}`} />
+        ))
+      )}
     </div>
   );
 }

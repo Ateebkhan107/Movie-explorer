@@ -13,18 +13,24 @@ export default function GenreFilter({ selectedGenre, onGenreChange }: GenreFilte
   const [genres, setGenres] = useState<Genre[]>([]);
 
   useEffect(() => {
+    let ignore = false;
     async function fetchGenres() {
       try {
         const res = await fetch('/api/genres');
         if (res.ok) {
           const data = await res.json();
-          setGenres(data.genres || []);
+          if (!ignore) {
+            setGenres(data.genres || []);
+          }
         }
       } catch (error) {
         console.error('Failed to fetch genres:', error);
       }
     }
     fetchGenres();
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   return (
@@ -35,7 +41,8 @@ export default function GenreFilter({ selectedGenre, onGenreChange }: GenreFilte
       <select
         value={selectedGenre}
         onChange={(e) => onGenreChange(e.target.value)}
-        className="w-full pl-11 pr-10 py-3 bg-white/90 backdrop-blur-md border border-white/20 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white shadow-lg transition-all appearance-none cursor-pointer"
+        aria-label="Filter movies by genre"
+        className="w-full pl-11 pr-10 py-3 bg-white/90 backdrop-blur-md border border-white/20 rounded-full text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white shadow-lg transition-all appearance-none cursor-pointer"
       >
         <option value="">All Genres</option>
         {genres.map((genre) => (

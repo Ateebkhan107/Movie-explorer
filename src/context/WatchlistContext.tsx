@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useSyncExternalStore } from 'react';
 import { Movie } from '@/types';
 import { useLocalStorage } from 'usehooks-ts';
 
@@ -13,13 +13,15 @@ interface WatchlistContextType {
 
 const WatchlistContext = createContext<WatchlistContextType | undefined>(undefined);
 
+const emptySubscribe = () => () => {};
+
 export function WatchlistProvider({ children }: { children: React.ReactNode }) {
   const [savedMovies, setSavedMovies] = useLocalStorage<Movie[]>('movie-watchlist', []);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const isClient = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
 
   const addToWatchlist = (movie: Movie) => {
     setSavedMovies((prev) => {
@@ -33,11 +35,11 @@ export function WatchlistProvider({ children }: { children: React.ReactNode }) {
   };
 
   const isInWatchlist = (id: number) => {
-    return savedMovies.some((movie) => movie.id === id);
+    return isClient && savedMovies.some((movie) => movie.id === id);
   };
 
   // Prevent hydration mismatch by providing empty array initially
-  const watchlist = mounted ? savedMovies : [];
+  const watchlist = isClient ? savedMovies : [];
 
   return (
     <WatchlistContext.Provider

@@ -12,25 +12,25 @@ export default function Hero() {
       
       <div className="z-10 text-white px-4">
         <motion.h1 
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1 }}
-          className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 flex items-center justify-center gap-4 drop-shadow-lg tracking-tight"
+          transition={{ duration: 0.5 }}
+          className="text-3xl sm:text-5xl md:text-6xl font-bold mb-3 flex items-center justify-center gap-3 drop-shadow-lg tracking-tight"
         >
           <motion.div
             animate={{ scale: [1, 1.1, 1] }}
             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
           >
-            <Film className="w-10 h-10 sm:w-14 sm:h-14 text-yellow-400 drop-shadow-[0_2px_10px_rgba(255,215,0,0.5)]" />
+            <Film className="w-8 h-8 sm:w-12 sm:h-12 text-yellow-400 drop-shadow-[0_2px_10px_rgba(255,215,0,0.5)]" />
           </motion.div>
           Movie Explorer
         </motion.h1>
         
         <motion.p 
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.3 }}
-          className="text-lg sm:text-xl font-light opacity-90 max-w-2xl mx-auto"
+          transition={{ duration: 0.5, delay: 0.15 }}
+          className="text-base sm:text-xl font-light opacity-90 max-w-2xl mx-auto px-2"
         >
           Discover the latest and greatest films from around the world
         </motion.p>
