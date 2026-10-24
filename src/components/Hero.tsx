@@ -1,14 +1,13 @@
 'use client';
 
-import { Film } from 'lucide-react';
+import { Film, Gamepad2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 export default function Hero() {
   return (
-    <div className="relative h-[350px] flex items-center justify-center text-center overflow-hidden mb-8">
+    <div className="relative h-[360px] flex items-center justify-center text-center overflow-hidden mb-8">
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 via-purple-600 to-fuchsia-500 opacity-90 -z-10" />
-      
-      {/* Animated background noise/grain overlay could be added here if desired, using a static image or CSS */}
       
       <div className="z-10 text-white px-4">
         <motion.h1 
@@ -34,6 +33,22 @@ export default function Hero() {
         >
           Discover the latest and greatest films from around the world
         </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.25 }}
+          className="mt-4"
+        >
+          <Link
+            href="/trivia"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/25 text-xs sm:text-sm font-medium text-amber-300 hover:text-white transition-all shadow-lg hover:scale-105 active:scale-95"
+          >
+            <Gamepad2 className="w-4 h-4 text-amber-400" />
+            <span>Play &quot;Guess the Movie&quot; Trivia Challenge</span>
+            <span className="text-white/60">➔</span>
+          </Link>
+        </motion.div>
       </div>
     </div>
   );

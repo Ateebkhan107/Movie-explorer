@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Film, Compass, Heart, Star } from 'lucide-react';
+import { Film, Compass, Heart, Star, Gamepad2 } from 'lucide-react';
 import { useWatchlist } from '@/context/WatchlistContext';
 import { useReviews } from '@/context/ReviewsContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,6 +15,7 @@ export default function Navbar() {
   const navLinks = [
     { name: 'Home', href: '/', icon: Film, badge: 0 },
     { name: 'Discover', href: '/discover', icon: Compass, badge: 0 },
+    { name: 'Trivia', href: '/trivia', icon: Gamepad2, badge: 0 },
     { name: 'Watchlist', href: '/watchlist', icon: Heart, badge: watchlist.length },
     { name: 'Reviews', href: '/reviews', icon: Star, badge: reviews.length },
   ];
@@ -30,7 +31,7 @@ export default function Navbar() {
             </Link>
           </div>
           
-          <div className="flex space-x-1 sm:space-x-3">
+          <div className="flex space-x-1 sm:space-x-2">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
               const Icon = link.icon;
