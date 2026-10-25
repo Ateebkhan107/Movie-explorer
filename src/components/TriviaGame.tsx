@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { TriviaQuestion, TriviaRoundSummary } from '@/types/trivia';
+import { TriviaQuestion } from '@/types/trivia';
 import { calculateRank, STATIC_TRIVIA_QUESTIONS, shuffleArray } from '@/lib/triviaData';
 import { fireConfetti } from '@/lib/confetti';
 import { sounds } from '@/lib/sound';
@@ -22,18 +22,22 @@ import {
   RotateCcw,
   CheckCircle2,
   XCircle,
-  HelpCircle,
   Film,
   Plus,
   Check,
+  Quote,
+  Users,
+  BookOpen,
 } from 'lucide-react';
 
 type GameState = 'lobby' | 'playing' | 'answered' | 'summary';
+type GameMode = 'all_cards' | 'quotes' | 'mixed';
 
 const QUESTION_TIME_LIMIT = 15; // 15 seconds per question
 
 export default function TriviaGame() {
   const [gameState, setGameState] = useState<GameState>('lobby');
+  const [gameMode, setGameMode] = useState<GameMode>('all_cards');
   const [questions, setQuestions] = useState<TriviaQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -60,10 +64,10 @@ export default function TriviaGame() {
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Fetch or prepare a round of 10 questions
-  const loadNewRound = useCallback(async () => {
+  // Fetch questions
+  const loadNewRound = useCallback(async (mode: GameMode) => {
     try {
-      const res = await fetch('/api/trivia?count=10');
+      const res = await fetch(`/api/trivia?mode=${mode}&count=10`);
       if (res.ok) {
         const data = await res.json();
         if (data.questions && data.questions.length > 0) {
@@ -74,20 +78,21 @@ export default function TriviaGame() {
     } catch {
       // Fallback
     }
+
     setQuestions(shuffleArray(STATIC_TRIVIA_QUESTIONS).slice(0, 10));
   }, []);
 
   useEffect(() => {
-    loadNewRound();
-  }, [loadNewRound]);
+    loadNewRound(gameMode);
+  }, [loadNewRound, gameMode]);
 
   const toggleSound = () => {
     sounds.enabled = soundMuted;
     setSoundMuted(!soundMuted);
   };
 
-  const startNewGame = () => {
-    loadNewRound();
+  const startNewGame = async () => {
+    await loadNewRound(gameMode);
     setScore(0);
     setStreak(0);
     setHighestStreak(0);
@@ -111,6 +116,7 @@ export default function TriviaGame() {
   const handleTimeout = useCallback(() => {
     if (gameState !== 'playing' || !currentQuestion) return;
 
+    sounds.playFlip();
     sounds.playWrong();
     setSelectedAnswer('__TIMEOUT__');
     setStreak(0);
@@ -162,10 +168,12 @@ export default function TriviaGame() {
     if (timerRef.current) clearInterval(timerRef.current);
     setSelectedAnswer(chosen);
 
+    sounds.playFlip();
+
     const isCorrect = chosen === currentQuestion.correctAnswer;
 
     if (isCorrect) {
-      sounds.playCorrect();
+      setTimeout(() => sounds.playCorrect(), 200);
       fireConfetti(1800);
 
       const newStreak = streak + 1;
@@ -180,7 +188,7 @@ export default function TriviaGame() {
 
       setScore((s) => s + earned);
     } else {
-      sounds.playWrong();
+      setTimeout(() => sounds.playWrong(), 200);
       setStreak(0);
       setMissedMovies((prev) => [
         ...prev,
@@ -239,15 +247,10 @@ export default function TriviaGame() {
     setTimeLeft((prev) => prev + 10);
   };
 
-  // Dynamic blur level for blurry poster clue: clears as time goes by
-  const blurPx = currentQuestion?.clueType === 'blurry_poster'
-    ? gameState === 'answered'
-      ? 0
-      : Math.max(0, Math.round((timeLeft / QUESTION_TIME_LIMIT) * 22))
-    : 0;
-
-  // Streak flame color
   const streakMultiplier = streak >= 4 ? '2.5x' : streak >= 3 ? '2.0x' : streak >= 2 ? '1.5x' : '1.0x';
+
+  // 3D Flip Card state: flipped to poster when answered!
+  const isFlipped = gameState === 'answered';
 
   return (
     <div className="w-full max-w-3xl mx-auto">
@@ -263,29 +266,80 @@ export default function TriviaGame() {
               Guess the Movie
             </h1>
             <p className="text-gray-300 text-sm sm:text-base max-w-lg mx-auto">
-              Test your cinema knowledge across 10 rounds of unblurring posters, iconic taglines, plot puzzles, and cast clues!
+              Read the clue on the mystery card, choose your guess, and watch the card flip to reveal the real movie poster!
             </p>
           </div>
 
-          {/* Quick rules & high score bar */}
+          {/* Mode Selector */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-xl mx-auto">
+            <button
+              onClick={() => setGameMode('all_cards')}
+              className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+                gameMode === 'all_cards'
+                  ? 'bg-amber-500/25 border-amber-400 text-white shadow-[0_0_20px_rgba(251,191,36,0.25)] ring-2 ring-amber-400/50'
+                  : 'bg-black/30 border-white/10 text-gray-300 hover:bg-white/10'
+              }`}
+            >
+              <div className="flex items-center gap-2 font-bold text-sm mb-1 text-amber-300">
+                <Sparkles className="w-4 h-4" /> 3D Flip Cards
+              </div>
+              <p className="text-xs text-gray-400 leading-snug">
+                Blank mystery card that flips around in 3D when you guess!
+              </p>
+            </button>
+
+            <button
+              onClick={() => setGameMode('quotes')}
+              className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+                gameMode === 'quotes'
+                  ? 'bg-purple-500/25 border-purple-400 text-white shadow-[0_0_20px_rgba(168,85,247,0.25)] ring-2 ring-purple-400/50'
+                  : 'bg-black/30 border-white/10 text-gray-300 hover:bg-white/10'
+              }`}
+            >
+              <div className="flex items-center gap-2 font-bold text-sm mb-1 text-purple-300">
+                <Quote className="w-4 h-4" /> Quotes & Lines
+              </div>
+              <p className="text-xs text-gray-400 leading-snug">
+                Guess famous cinema lines before flipping the poster.
+              </p>
+            </button>
+
+            <button
+              onClick={() => setGameMode('mixed')}
+              className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+                gameMode === 'mixed'
+                  ? 'bg-indigo-500/25 border-indigo-400 text-white shadow-[0_0_20px_rgba(99,102,241,0.25)] ring-2 ring-indigo-400/50'
+                  : 'bg-black/30 border-white/10 text-gray-300 hover:bg-white/10'
+              }`}
+            >
+              <div className="flex items-center gap-2 font-bold text-sm mb-1 text-indigo-300">
+                <Film className="w-4 h-4" /> Mixed Clues
+              </div>
+              <p className="text-xs text-gray-400 leading-snug">
+                A thrilling mix of plots, quotes, cast links, and trivia.
+              </p>
+            </button>
+          </div>
+
+          {/* Quick rules bar */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-xl mx-auto text-left">
-            <div className="p-4 bg-black/30 border border-white/10 rounded-2xl">
+            <div className="p-3.5 bg-black/30 border border-white/10 rounded-2xl">
               <div className="flex items-center gap-2 text-indigo-400 text-xs font-bold uppercase tracking-wider mb-1">
-                <Clock className="w-4 h-4" /> 15s Timer
+                <Clock className="w-4 h-4" /> 15s Per Round
               </div>
               <p className="text-xs text-gray-300">Answer fast for max speed bonus points.</p>
             </div>
 
-            <div className="p-4 bg-black/30 border border-white/10 rounded-2xl">
+            <div className="p-3.5 bg-black/30 border border-white/10 rounded-2xl">
               <div className="flex items-center gap-2 text-amber-400 text-xs font-bold uppercase tracking-wider mb-1">
                 <Flame className="w-4 h-4" /> Multiplier
               </div>
-              <p className="text-xs text-gray-300">Build streaks for up to 2.5x score boosts!</p>
+              <p className="text-xs text-gray-300">Keep streaks alive for up to 2.5x score!</p>
             </div>
 
-            <div className="p-4 bg-black/30 border border-white/10 rounded-2xl">
+            <div className="p-3.5 bg-black/30 border border-white/10 rounded-2xl">
               <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-1">
-                <Trophy className="w-4 h-4" /> Best Score
+                <Trophy className="w-4 h-4" /> Personal Best
               </div>
               <p className="text-sm font-bold text-white">{highScore.toLocaleString()} pts</p>
             </div>
@@ -301,7 +355,7 @@ export default function TriviaGame() {
             </button>
             <button
               onClick={toggleSound}
-              className="p-3.5 bg-white/10 hover:bg-white/20 text-white/80 hover:text-white rounded-full border border-white/20 transition-all"
+              className="p-3.5 bg-white/10 hover:bg-white/20 text-white/80 hover:text-white rounded-full border border-white/20 transition-all cursor-pointer"
               aria-label={soundMuted ? 'Unmute sound' : 'Mute sound'}
             >
               {soundMuted ? <VolumeX className="w-5 h-5 text-rose-400" /> : <Volume2 className="w-5 h-5 text-emerald-400" />}
@@ -315,10 +369,9 @@ export default function TriviaGame() {
         <div className="space-y-4">
           {/* Top Bar: Progress, Score, Streak & Sound */}
           <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 flex items-center justify-between shadow-xl">
-            {/* Question Progress */}
             <div>
               <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-300 block">
-                Round {currentIndex + 1} of {questions.length}
+                Question {currentIndex + 1} of {questions.length}
               </span>
               <span className="text-base sm:text-lg font-bold text-white">
                 {score.toLocaleString()} <span className="text-xs font-normal text-white/60">pts</span>
@@ -333,11 +386,11 @@ export default function TriviaGame() {
               </div>
             )}
 
-            {/* Controls */}
+            {/* Sound Toggle */}
             <div className="flex items-center gap-2">
               <button
                 onClick={toggleSound}
-                className="p-2 bg-white/5 hover:bg-white/15 rounded-full text-white/80 transition-colors"
+                className="p-2 bg-white/5 hover:bg-white/15 rounded-full text-white/80 transition-colors cursor-pointer"
                 aria-label="Toggle sound"
               >
                 {soundMuted ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4 text-emerald-400" />}
@@ -365,10 +418,10 @@ export default function TriviaGame() {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs font-bold uppercase tracking-wider">
                 <Sparkles className="w-3.5 h-3.5" />
-                {currentQuestion.clueType === 'blurry_poster' && '🎯 Blurry Poster Challenge'}
-                {currentQuestion.clueType === 'tagline' && '📜 Famous Tagline'}
-                {currentQuestion.clueType === 'plot' && '📖 Mystery Plot'}
+                {currentQuestion.clueType === 'tagline' && '📜 Famous Line Clue'}
+                {currentQuestion.clueType === 'plot' && '📖 Mystery Plot Clue'}
                 {currentQuestion.clueType === 'cast' && '👥 Cast Connection'}
+                {currentQuestion.clueType === 'blurry_poster' && '🎴 3D Mystery Card Flip'}
               </div>
 
               {/* Power-ups / Lifelines */}
@@ -378,7 +431,7 @@ export default function TriviaGame() {
                     onClick={useLifeline5050}
                     disabled={lifeline5050Used}
                     title="Eliminate 2 wrong answers"
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-white/20 bg-white/5 hover:bg-white/15 disabled:opacity-40 text-amber-300 transition-all text-xs font-semibold"
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-white/20 bg-white/5 hover:bg-white/15 disabled:opacity-40 text-amber-300 transition-all text-xs font-semibold cursor-pointer"
                   >
                     <Zap className="w-3.5 h-3.5" /> 50:50
                   </button>
@@ -387,7 +440,7 @@ export default function TriviaGame() {
                     onClick={useLifelineHint}
                     disabled={lifelineHintUsed}
                     title="Reveal hint"
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-white/20 bg-white/5 hover:bg-white/15 disabled:opacity-40 text-cyan-300 transition-all text-xs font-semibold"
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-white/20 bg-white/5 hover:bg-white/15 disabled:opacity-40 text-cyan-300 transition-all text-xs font-semibold cursor-pointer"
                   >
                     <Lightbulb className="w-3.5 h-3.5" /> Hint
                   </button>
@@ -396,7 +449,7 @@ export default function TriviaGame() {
                     onClick={useLifelineTime}
                     disabled={lifelineTimeUsed}
                     title="Add 10 seconds"
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-white/20 bg-white/5 hover:bg-white/15 disabled:opacity-40 text-emerald-300 transition-all text-xs font-semibold"
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-white/20 bg-white/5 hover:bg-white/15 disabled:opacity-40 text-emerald-300 transition-all text-xs font-semibold cursor-pointer"
                   >
                     <Clock className="w-3.5 h-3.5" /> +10s
                   </button>
@@ -404,34 +457,92 @@ export default function TriviaGame() {
               )}
             </div>
 
-            {/* Poster Clue Visual */}
-            {currentQuestion.posterPath && (
-              <div className="relative w-40 sm:w-48 aspect-[2/3] mx-auto rounded-2xl overflow-hidden shadow-2xl border-2 border-white/20 bg-black/60">
-                <Image
-                  src={getTmdbImageUrl(currentQuestion.posterPath, 'w342')}
-                  alt="Mystery Movie Poster"
-                  fill
-                  priority
+            {/* 3D FLIP CARD: Blank card during question -> Flips 180° to reveal poster on answer! */}
+            <div
+              className="w-48 sm:w-56 aspect-[2/3] mx-auto select-none my-4"
+              style={{ perspective: '1200px' }}
+            >
+              <div
+                className="relative w-full h-full"
+                style={{
+                  transformStyle: 'preserve-3d',
+                  transition: 'transform 0.8s cubic-bezier(0.34, 1.4, 0.64, 1)',
+                  transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+                }}
+              >
+                {/* FRONT SIDE (Blank Mystery Card during question) */}
+                <div
+                  className="absolute inset-0 w-full h-full rounded-3xl overflow-hidden border-2 border-amber-400/40 bg-gradient-to-br from-gray-950 via-indigo-950 to-purple-950 shadow-2xl p-5 flex flex-col items-center justify-between"
                   style={{
-                    filter: `blur(${blurPx}px)`,
-                    transform: 'scale(1.08)',
-                    transition: 'filter 0.5s ease',
+                    backfaceVisibility: 'hidden',
+                    WebkitBackfaceVisibility: 'hidden',
                   }}
-                  className="object-cover"
-                />
-                {blurPx > 0 && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none">
-                    <span className="bg-black/70 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-bold text-white border border-white/20">
-                      Unblurring in {timeLeft}s
+                >
+                  {/* Top card emblem */}
+                  <div className="w-full flex items-center justify-between text-amber-400/70 text-xs font-mono">
+                    <span>🎬 CINE</span>
+                    <span className="text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-full bg-amber-400/10 border border-amber-400/20 font-bold">
+                      #{currentIndex + 1}
+                    </span>
+                    <span>🎬</span>
+                  </div>
+
+                  {/* Center Mystery Emblem */}
+                  <div className="flex flex-col items-center justify-center space-y-3">
+                    <div className="relative">
+                      <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-amber-500/20 via-purple-500/20 to-indigo-500/20 border-2 border-amber-400/30 flex items-center justify-center text-amber-300 shadow-[0_0_25px_rgba(251,191,36,0.3)] animate-pulse">
+                        <Film className="w-10 h-10 text-amber-300" />
+                      </div>
+                      <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-indigo-500 text-white text-xs font-black flex items-center justify-center border border-white/20 shadow-md">
+                        ?
+                      </div>
+                    </div>
+
+                    <div className="text-center space-y-1">
+                      <span className="text-base font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-yellow-200 uppercase block drop-shadow-sm">
+                        Mystery Film
+                      </span>
+                      <span className="text-[11px] text-gray-400 block tracking-wider">
+                        Tap your guess to flip
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Bottom card footer */}
+                  <div className="w-full flex items-center justify-between text-white/30 text-[10px] font-mono border-t border-white/10 pt-2">
+                    <span>EST. {currentQuestion.releaseYear}</span>
+                    <span>MOVIE EXPLORER</span>
+                  </div>
+                </div>
+
+                {/* BACK SIDE (Revealed Movie Poster upon answering) */}
+                <div
+                  className="absolute inset-0 w-full h-full rounded-3xl overflow-hidden border-2 border-emerald-400/60 shadow-[0_0_30px_rgba(16,185,129,0.35)] bg-black"
+                  style={{
+                    backfaceVisibility: 'hidden',
+                    WebkitBackfaceVisibility: 'hidden',
+                    transform: 'rotateY(180deg)',
+                  }}
+                >
+                  <Image
+                    src={getTmdbImageUrl(currentQuestion.posterPath, 'w342')}
+                    alt={currentQuestion.title}
+                    fill
+                    priority
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent flex items-end p-3 pointer-events-none">
+                    <span className="text-xs font-bold text-white drop-shadow-md truncate">
+                      {currentQuestion.title}
                     </span>
                   </div>
-                )}
+                </div>
               </div>
-            )}
+            </div>
 
-            {/* Clue Text */}
+            {/* Clue description text */}
             <div className="text-center space-y-2">
-              <p className="text-lg sm:text-2xl font-bold text-white drop-shadow-md leading-relaxed">
+              <p className="text-lg sm:text-2xl font-bold text-white drop-shadow-md leading-relaxed max-w-xl mx-auto">
                 {currentQuestion.clueText}
               </p>
 
@@ -441,9 +552,9 @@ export default function TriviaGame() {
                   {currentQuestion.castClues.map((cast, idx) => (
                     <span
                       key={idx}
-                      className="px-3 py-1 bg-white/10 border border-white/15 rounded-full text-xs text-gray-200"
+                      className="px-3 py-1 bg-white/10 border border-white/15 rounded-full text-xs text-cyan-200"
                     >
-                      {cast}
+                      ⭐ {cast}
                     </span>
                   ))}
                 </div>
@@ -451,9 +562,9 @@ export default function TriviaGame() {
 
               {/* Revealed Lifeline Hint */}
               {hintRevealed && (
-                <div className="bg-cyan-500/20 border border-cyan-500/40 rounded-xl p-2.5 text-cyan-200 text-xs sm:text-sm animate-pulse max-w-md mx-auto">
+                <div className="bg-cyan-500/20 border border-cyan-500/40 rounded-xl p-2.5 text-cyan-200 text-xs sm:text-sm animate-pulse max-w-md mx-auto text-center">
                   💡 <strong>Hint:</strong> Released in {currentQuestion.releaseYear}
-                  {currentQuestion.genres.length > 0 ? ` • ${currentQuestion.genres.join(', ')}` : ''}
+                  {currentQuestion.genres.length > 0 ? ` • Genres: ${currentQuestion.genres.join(', ')}` : ''}
                 </div>
               )}
             </div>
@@ -519,10 +630,10 @@ export default function TriviaGame() {
                   <div>
                     <h4 className="font-bold text-sm sm:text-base">
                       {selectedAnswer === currentQuestion.correctAnswer
-                        ? 'Spot on! Correct answer!'
+                        ? `Spot on! The film is "${currentQuestion.correctAnswer}"!`
                         : selectedAnswer === '__TIMEOUT__'
                         ? `Time ran out! The correct film was "${currentQuestion.correctAnswer}".`
-                        : `Not quite! The correct answer was "${currentQuestion.correctAnswer}".`}
+                        : `Not quite! The correct film was "${currentQuestion.correctAnswer}".`}
                     </h4>
                     <p className="text-xs sm:text-sm mt-1 text-white/80 leading-relaxed">
                       🎬 <strong>Did you know?</strong> {currentQuestion.funFact}
@@ -624,7 +735,7 @@ export default function TriviaGame() {
                             overview: '',
                           })
                         }
-                        className={`flex items-center gap-1 px-2.5 py-1 rounded-lg font-medium transition-colors ${
+                        className={`flex items-center gap-1 px-2.5 py-1 rounded-lg font-medium transition-colors cursor-pointer ${
                           saved
                             ? 'bg-rose-500/20 text-rose-300'
                             : 'bg-indigo-600 hover:bg-indigo-500 text-white'
